@@ -156,6 +156,7 @@ static void jtag_run(int count)
 //-----------------------------------------------------------------------------
 void fpga_enable(void)
 {
+  #if 0
   u32 idcode;
 
   usb_jtag_enable(true);
@@ -166,24 +167,31 @@ void fpga_enable(void)
 
   if (FPGA_IDCODE != idcode)
     os_error("incorrect FPGA IDCODE (0x%08x)", idcode);
+  #endif
 }
 
 //-----------------------------------------------------------------------------
 void fpga_disable(void)
 {
+  #if 0
   jtag_reset();
   jtag_sync();
   usb_jtag_enable(false);
+  #endif
 }
 
 //-----------------------------------------------------------------------------
 u32 fpga_read_idcode(void)
 {
+  #if 1
+  u32 idcode = 0x20250616;  // dummy id
+  #else
   u32 idcode = 0;
 
   jtag_write_ir(CMD_IDCODE_PUB);
   jtag_read_dr((u8 *)&idcode, 32);
   jtag_sync();
+  #endif
 
   return idcode;
 }
@@ -191,10 +199,14 @@ u32 fpga_read_idcode(void)
 //-----------------------------------------------------------------------------
 u64 fpga_read_traceid(void)
 {
+  #if 1
+  u32 traceid = 0x20250616;  // dummy id
+  #else
   u64 traceid = 0;
 
   jtag_write_ir(CMD_UIDCODE_PUB);
   jtag_read_dr((u8 *)&traceid, 64);
+  #endif
 
   return traceid;
 }
