@@ -369,7 +369,7 @@ void setup_endpoints(void)
 //-----------------------------------------------------------------------------
 static inline void sys_init(void)
 {
-  CPUCS = CPUCS_CLKSPD_48_MHZ;
+  CPUCS = CPUCS_CLKOE | CPUCS_CLKSPD_48_MHZ;
   SYNCDELAY;
 
   REVCTL = REVCTL_DYN_OUT | REVCTL_ENH_PKT;
