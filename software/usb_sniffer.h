@@ -16,6 +16,7 @@ typedef struct
 
   char     *speed;
   bool     fold_empty;
+  bool     exclude_line_state;
   char     *limit;
   char     *trigger;
   bool     test;

@@ -115,6 +115,7 @@ static void parse_command_line(int argc, char *argv[])
     {  1, "Capture:", NULL, NULL, NULL },
     { 's', "speed",    "speed",  &g_opt.speed,      "select USB speed: 'ls', 'fs' (default) or 'hs'" },
     { 'l', "fold",     NULL,     &g_opt.fold_empty, "fold empty frames" },
+    { 'e', "exclude",  NULL,     &g_opt.exclude_line_state, "exclude line state" },
     { 'n', "limit",    "number", &g_opt.limit,      "limit the number of captured packets" },
     { 't', "trigger",  "type",   &g_opt.trigger,    "capture trigger: 'disabled' (default), 'low', 'high', 'falling' or 'rising'" },
     {  0 , "test",     NULL,     &g_opt.test,       "perform a transfer rate test" },

@@ -142,13 +142,14 @@ bool capture_extcap_request(void)
     printf("value {arg=0}{value=fs}{display=Full-Speed}{default=true}\n");
     printf("value {arg=0}{value=hs}{display=High-Speed}{default=false}\n");
     printf("arg {number=1}{call=--fold}{display=Fold empty frames}{tooltip=Fold frames that have no data or errors}{type=boolflag}\n");
-    printf("arg {number=2}{call=--trigger}{display=Capture Trigger}{tooltip=Condition used to start the capture}{type=selector}\n");
+    printf("arg {number=2}{call=--exclude}{display=Exclude Line State}{tooltip=Exclude Line State to reduce CPU usage}{type=boolflag}\n");
+    printf("arg {number=3}{call=--trigger}{display=Capture Trigger}{tooltip=Condition used to start the capture}{type=selector}\n");
     printf("value {arg=2}{value=disabled}{display=Disabled}{default=true}\n");
     printf("value {arg=2}{value=low}{display=Low}{default=false}\n");
     printf("value {arg=2}{value=high}{display=High}{default=false}\n");
     printf("value {arg=2}{value=falling}{display=Falling}{default=false}\n");
     printf("value {arg=2}{value=rising}{display=Rising}{default=false}\n");
-    printf("arg {number=3}{call=--limit}{display=Capture Limit}{tooltip=Limit the number of captured packets (0 for unlimited)}{type=integer}{range=0,10000000}{default=0}\n");
+    printf("arg {number=4}{call=--limit}{display=Capture Limit}{tooltip=Limit the number of captured packets (0 for unlimited)}{type=integer}{range=0,10000000}{default=0}\n");
     return true;
   }
 
@@ -357,6 +358,9 @@ static void line_state_event(void)
     return;
 
   capture_saved_ls = LS_INVALID;
+
+  if (g_opt.exclude_line_state)
+    return;
 
   sprintf(str, "Line state: ");
 
