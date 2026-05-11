@@ -138,8 +138,9 @@ bool capture_extcap_request(void)
   if (g_opt.extcap_config)
   {
     printf("arg {number=0}{call=--speed}{display=Capture Speed}{tooltip=USB capture speed}{type=selector}\n");
+    printf("value {arg=0}{value=auto}{display=Auto-Detect}{default=true}\n");
     printf("value {arg=0}{value=ls}{display=Low-Speed}{default=false}\n");
-    printf("value {arg=0}{value=fs}{display=Full-Speed}{default=true}\n");
+    printf("value {arg=0}{value=fs}{display=Full-Speed}{default=false}\n");
     printf("value {arg=0}{value=hs}{display=High-Speed}{default=false}\n");
     printf("arg {number=1}{call=--fold}{display=Fold empty frames}{tooltip=Fold frames that have no data or errors}{type=boolflag}\n");
     printf("arg {number=2}{call=--exclude}{display=Exclude Line State}{tooltip=Exclude Line State to reduce CPU usage}{type=boolflag}\n");
@@ -242,6 +243,8 @@ static void write_usb_header(void)
     link_type = LINKTYPE_USB_2_0_FULL_SPEED;
   else if (CaptureSpeed_HS == g_opt.capture_speed)
     link_type = LINKTYPE_USB_2_0_HIGH_SPEED;
+  else if (CaptureSpeed_Reset == g_opt.capture_speed)
+    link_type = LINKTYPE_USB_2_0;
   else
     os_assert(false);
 
@@ -351,7 +354,6 @@ static void line_state_event(void)
   int dp = (capture_saved_ls >> 0) & 3;
   int dm = (capture_saved_ls >> 2) & 3;
   int delta = capture_ts - capture_saved_ts;
-  int level = 0;
   char str[256];
 
   if (LS_INVALID == capture_saved_ls)
@@ -370,13 +372,11 @@ static void line_state_event(void)
   }
   else if (dp == 0)
   {
-    strcat(str, (CaptureSpeed_LS == g_opt.capture_speed) ? "J" : "K");
-    level = dm;
+    strcat(str, (CaptureSpeed_LS == capture_speed) ? "J" : "K");
   }
   else if (dm == 0)
   {
-    strcat(str, (CaptureSpeed_LS == g_opt.capture_speed) ? "K" : "J");
-    level = dp;
+    strcat(str, (CaptureSpeed_LS == capture_speed) ? "K" : "J");
   }
   else
   {
@@ -384,11 +384,6 @@ static void line_state_event(void)
     snprintf(buf, sizeof(buf), "Undefined (DP=%d / DM=%d)", dp, dm);
     strcat(str, buf);
   }
-
-  if (level == 1)
-    strcat(str, " [both]");
-  else if (level == 2)
-    strcat(str, " [single]");
 
   if (delta < LS_DELTA_THRESHOLD)
   {
@@ -464,7 +459,7 @@ static void status_event(int ls, int vbus, int trigger, int speed)
 
     capture_ls = ls;
 
-    if (CaptureSpeed_LS == g_opt.capture_speed && LS_SE0 == capture_saved_ls && LS_J3 == ls &&
+    if (CaptureSpeed_LS == capture_speed && LS_SE0 == capture_saved_ls && LS_J3 == ls &&
         (MIN_KEEPALIVE_DURATION < delta && delta < MAX_KEEPALIVE_DURATION))
     {
       capture_saved_ls = LS_INVALID;
@@ -568,7 +563,7 @@ static void keepalive_event(u64 ts, int delta)
 static void data_event(void)
 {
   bool data_error = capture_crc_error || capture_data_error;
-  bool allow_sof  = (CaptureSpeed_LS != g_opt.capture_speed);
+  bool allow_sof  = (CaptureSpeed_LS != capture_speed);
   int pid = capture_data[0];
 
   if (!capture_enabled)
@@ -600,7 +595,7 @@ static void data_event(void)
       capture_fold_count++;
       capture_fold_buf_ptr = 0;
 
-      if (capture_fold_count == ((CaptureSpeed_HS == g_opt.capture_speed) ? FOLD_LIMIT_HS : FOLD_LIMIT_LS_FS))
+      if (capture_fold_count == ((CaptureSpeed_HS == capture_speed) ? FOLD_LIMIT_HS : FOLD_LIMIT_LS_FS))
         stop_folding();
 
       fold_packet(capture_ts, capture_data, capture_size);
