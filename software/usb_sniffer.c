@@ -13,8 +13,11 @@
 #define FX2LP_VID      0x04b4
 #define FX2LP_PID      0x8613
 
-#define CAPTURE_VID    0x6666
-#define CAPTURE_PID    0x6620
+#define CAPTURE_VID    0x1209
+#define CAPTURE_PID    0x6688
+
+#define CAPTURE_VID_LEGACY  0x6666
+#define CAPTURE_PID_LEGACY  0x6620
 
 /*- Variables ---------------------------------------------------------------*/
 Options g_opt;
@@ -148,8 +151,13 @@ static void parse_command_line(int argc, char *argv[])
 //-----------------------------------------------------------------------------
 void open_capture_device(void)
 {
-  if (!usb_open(CAPTURE_VID, CAPTURE_PID))
-    os_error("could not open a capture device");
+  if (usb_open(CAPTURE_VID, CAPTURE_PID))
+    return;
+
+  if (usb_open(CAPTURE_VID_LEGACY, CAPTURE_PID_LEGACY))
+    return;
+
+  os_error("could not open a capture device");
 }
 
 //-----------------------------------------------------------------------------
